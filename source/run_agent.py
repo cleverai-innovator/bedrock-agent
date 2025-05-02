@@ -2,11 +2,17 @@ import boto3
 import uuid
 import pprint
 import json
+import os
 from typing import Dict, Any, Optional, Union
 from source.common.logger_setup import get_logger
 
 # Setting logger
 logger = get_logger(__name__)
+
+"""
+Run Agent function:
+    The function is used to invoke the Bedrock Agent via Boto3 API.
+"""
 
 def run_agent(
     input_text: str, 
@@ -83,3 +89,53 @@ def run_agent(
 
     return agent_response
 
+"""
+Run Lambda function:
+    The function is used to invoke run_agent.
+"""
+# Get Agent ID and Agent Alias ID from SSM Parameter Store
+ssm = boto3.client('ssm')
+agent_id = ssm.get_parameter(Name='/myapp/agent_id', WithDecryption=True)['Parameter']['Value']
+agent_alias_id = ssm.get_parameter(Name='/myapp/agent_alias_id', WithDecryption=True)['Parameter']['Value']
+
+def lambda_handler(event, context):
+    try:
+        # Default Agent Configuration
+        AGENT_ID = os.environ['AGENT_ID']
+        AGENT_ALIAS_ID = os.environ['AGENT_ALIAS_ID']
+        
+        # Extract inputs from the event
+        user_input = event.get('user_input')
+        session_id = event.get('session_id')
+        end_session = event.get('end_session', False)
+
+        if user_input is None:
+            logger.error("User input is required. session_id:{session_id}")
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'error': 'User input is required'})
+            }
+        
+        # Call the run_agent function
+        response = run_agent(
+            input_text= user_input,
+            agent_id= AGENT_ID,
+            agent_alias_id= AGENT_ALIAS_ID,
+            session_id= session_id,
+            end_session= end_session
+        )
+        return{
+            'statusCode': 200,
+            'body': json.dumps({
+                'session_id': session_id,
+                'agent_response': response
+            })
+        }
+    except Exception as e:
+        logger.exception("Error in Lambda handler")
+        return {
+            'statusCode': 500,
+            'body': json.dumps({
+                'error': str(e)
+            })
+        }
