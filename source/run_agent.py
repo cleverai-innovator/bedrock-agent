@@ -93,10 +93,6 @@ def run_agent(
 Run Lambda function:
     The function is used to invoke run_agent.
 """
-# Get Agent ID and Agent Alias ID from SSM Parameter Store
-ssm = boto3.client('ssm')
-agent_id = ssm.get_parameter(Name='/myapp/agent_id', WithDecryption=True)['Parameter']['Value']
-agent_alias_id = ssm.get_parameter(Name='/myapp/agent_alias_id', WithDecryption=True)['Parameter']['Value']
 
 def lambda_handler(event, context):
     try:
