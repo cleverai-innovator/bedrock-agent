@@ -58,6 +58,15 @@ def test_run_agent_warning_event(mock_boto_client):
 
     response = run_agent("Hi", "test-agent", "test-agent-alias")
     assert response == 'Something went wrong'
-    
+
+def test_run_agent_unexpected_event(mock_boto_client):
+    mock_client_instance = MagicMock()
+    mock_boto_client.return_value = mock_client_instance
+    mock_event_stream = [{'invalid_event': 'this will cause an error'}]
+
+    mock_client_instance.invoke_agent.return_value = {'completion': mock_event_stream}
+
+    response = run_agent("Hi", "test-agent", "test-agent-alias")
+    assert response == 'Something went wrong'
 
     
