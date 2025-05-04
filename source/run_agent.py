@@ -41,7 +41,7 @@ def run_agent(
     event_stream = response.get('completion')
     if event_stream is None:
         logger.error("No response from the agent")
-        return "No response from the agent"
+        return "Something went wrong"
 
     error_keys_error_level = {
         'accessDeniedException', 'conflictException',
@@ -70,21 +70,21 @@ def run_agent(
                 key = next(k for k in event if k in error_keys_error_level)
                 error_msg = event[key].get('message', str(event[key]))
                 logger.error(f"{key}: {error_msg}")
-                agent_response = error_msg
+                agent_response = "Something went wrong"
             elif any(key in event for key in error_keys_warning_level):
                 key = next(k for k in event if k in error_keys_warning_level)
                 error_msg = event[key].get('message', str(event[key]))
                 logger.warning(f"{key}: {error_msg}")
-                agent_response = error_msg
+                agent_response = "Something went wrong"
 
             # Log unexpected events
             else:
                 logger.warning(f"Unexpected event: {event}")
-                agent_response = 'Unexpected error occurred'
+                agent_response = 'Something went wrong'
 
     except Exception as e:
         logger.exception("Unexpected error occurred")
-        agent_response = 'Unexpected error occurred'
+        agent_response = 'Something went wrong'
         raise
 
     return agent_response
