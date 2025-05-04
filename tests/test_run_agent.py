@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock, patch
-from source.run_agent import run_agent
+from source.invoke_cloud_agent import run_agent
 
 @pytest.fixture
 def mock_boto_client():

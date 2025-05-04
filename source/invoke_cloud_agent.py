@@ -99,7 +99,7 @@ def run_agent(
     return agent_response
 
 """
-Run Lambda function:
+Invoke Cloud Agent Lambda function:
     The function is used to invoke run_agent.
 """
 
