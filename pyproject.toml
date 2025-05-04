@@ -9,19 +9,3 @@ dependencies = [
     "uuid>=1.30",
 ]
 
-# Specify the build system
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-# Configure package discovery
-[tool.hatch.build.targets.wheel]
-packages = ["source"]
-
-# Optional: Configure development dependencies
-[tool.hatch.envs.default]
-dependencies = [
-    "pytest",
-    "black",
-    "isort",
-]
