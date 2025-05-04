@@ -73,7 +73,8 @@ def run_agent(
             # Handle the trace from the agent
             elif 'trace' in event:
                 logger.info(json.dumps(event['trace'], indent=2, cls=DateTimeEncoder))
-            
+                agent_response = 'Something went wrong'
+                
             elif any(key in event for key in error_keys_error_level):
                 key = next(k for k in event if k in error_keys_error_level)
                 error_msg = event[key].get('message', str(event[key]))
@@ -83,7 +84,7 @@ def run_agent(
                 key = next(k for k in event if k in error_keys_warning_level)
                 error_msg = event[key].get('message', str(event[key]))
                 logger.warning(f"{key}: {error_msg}")
-                agent_response = "Something went wrong"
+                agent_response = 'Something went wrong'
 
             # Log unexpected events
             else:
