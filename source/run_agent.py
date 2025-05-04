@@ -5,7 +5,7 @@ import json
 import os
 from datetime import datetime
 from typing import Dict, Any, Optional, Union
-from common.logger_setup import get_logger
+from source.common.logger_setup import get_logger
 
 # Setting logger
 logger = get_logger(__name__)
@@ -143,9 +143,3 @@ def lambda_handler(event, context):
                 'error': str(e)
             })
         }
-
-run_agent(
-    input_text= "when is my birthday",
-    agent_id= "DGEW1P4VGX",
-    agent_alias_id= "ZPWRQAJG5H"
-)
