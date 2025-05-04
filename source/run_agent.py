@@ -3,11 +3,18 @@ import uuid
 import pprint
 import json
 import os
+from datetime import datetime
 from typing import Dict, Any, Optional, Union
-from source.common.logger_setup import get_logger
+from common.logger_setup import get_logger
 
 # Setting logger
 logger = get_logger(__name__)
+
+class DateTimeEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        return super().default(obj)
 
 """
 Run Agent function:
@@ -33,7 +40,8 @@ def run_agent(
         agentAliasId=agent_alias_id,
         sessionId=session_id,
         enableTrace=enable_trace,
-        endSession=end_session
+        endSession=end_session,
+        inputText=input_text
     )
     logger.info(pprint.pformat(response))
 
@@ -64,7 +72,7 @@ def run_agent(
 
             # Handle the trace from the agent
             elif 'trace' in event:
-                logger.info(json.dumps(event['trace'], indent=2))
+                logger.info(json.dumps(event['trace'], indent=2, cls=DateTimeEncoder))
             
             elif any(key in event for key in error_keys_error_level):
                 key = next(k for k in event if k in error_keys_error_level)
@@ -135,3 +143,9 @@ def lambda_handler(event, context):
                 'error': str(e)
             })
         }
+
+run_agent(
+    input_text= "when is my birthday",
+    agent_id= "DGEW1P4VGX",
+    agent_alias_id= "ZPWRQAJG5H"
+)
