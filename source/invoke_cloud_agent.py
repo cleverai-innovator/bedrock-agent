@@ -28,7 +28,7 @@ def run_agent(
     session_id: Optional[str] = None,
     enable_trace: Optional[bool] =True,
     end_session: Optional[bool] =False
-    ) -> Union[str, Dict[str, Any]]:
+    ) -> Dict[str, Any]:
         
     if not session_id:
         session_id = uuid.uuid4().hex
@@ -44,6 +44,9 @@ def run_agent(
         inputText=input_text
     )
     logger.info(pprint.pformat(response))
+
+    # Get the session_id from the response headers
+    bedrock_session_id = response['ResponseMetadata']['HTTPHeaders'].get('x-amz-bedrock-agent-session-id')
 
     agent_response = ''
     event_stream = response.get('completion')
@@ -96,7 +99,10 @@ def run_agent(
         agent_response = 'Something went wrong'
         raise
 
-    return agent_response
+    return {
+        'response': agent_response,
+        'session_id': bedrock_session_id
+    }
 
 """
 Invoke Cloud Agent Lambda function:
@@ -122,18 +128,25 @@ def lambda_handler(event, context):
             }
         
         # Call the run_agent function
-        response = run_agent(
+        result = run_agent(
             input_text= user_input,
             agent_id= AGENT_ID,
             agent_alias_id= AGENT_ALIAS_ID,
             session_id= session_id,
             end_session= end_session
         )
+
+        # Get values from the run agent result
+        agent_response = result['response']
+        bedrock_session_id = result['session_id']
+
         return{
             'statusCode': 200,
+            'headers':{
+                'X-Session-Id': bedrock_session_id
+            },
             'body': json.dumps({
-                'session_id': session_id,
-                'agent_response': response
+                'agent_response': agent_response
             })
         }
     except Exception as e:
