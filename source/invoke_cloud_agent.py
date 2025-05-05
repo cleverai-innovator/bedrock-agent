@@ -46,13 +46,16 @@ def run_agent(
     logger.info(pprint.pformat(response))
 
     # Get the session_id from the response headers
-    bedrock_session_id = response['ResponseMetadata']['HTTPHeaders'].get('x-amz-bedrock-agent-session-id')
+    bedrock_session_id = response.get('ResponseMetadata', {}).get('HTTPHeaders', {}).get('x-amz-bedrock-agent-session-id')
 
     agent_response = ''
     event_stream = response.get('completion')
     if event_stream is None:
         logger.error("No response from the agent")
-        return "Something went wrong"
+        return {
+            'response': "Something went wrong",
+            'session_id': bedrock_session_id
+        }
 
     error_keys_error_level = {
         'accessDeniedException', 'conflictException',
