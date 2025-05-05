@@ -8,6 +8,14 @@ paths:
   /invoke-cloud-agent:
     post:
       summary: Invoke the Bedrock agent
+      operationId: invokeCloudAgent
+      parameters:
+        - name: X-Session-Id
+          in: header
+          description: Optional session ID for the request
+          required: false
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -18,9 +26,6 @@ paths:
                 user_input:
                   type: string
                   description: User input text (required)
-                session_id:
-                  type: string
-                  description: Optional field for a new session.
                 end_session:
                   type: boolean
                   description: Whether to end the session
@@ -29,18 +34,36 @@ paths:
       responses:
         '200':
           description: Successful response from agent
+          headers:
+            X-Session-Id:
+              description: Bedrock session ID returned from the agent
+              schema:
+                type: string
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  session_id:
-                    type: string
-                    description: The session ID
                   agent_response:
                     type: string
                     description: The agent’s response text
         '400':
           description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
         '500':
           description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
